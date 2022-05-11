@@ -42,7 +42,7 @@ struct List {
     ListNode* head;
 };
 
-
+ListNode *searchForFile(TreeNode* currentNode, char* fileName);
 void ls(TreeNode* currentNode, char* arg);
 void pwd(TreeNode* treeNode);
 TreeNode* cd(TreeNode* currentNode, char* path);

@@ -6,63 +6,515 @@
 #define NO_ARG ""
 #define PARENT_DIR ".."
 
+ListNode *searchForFile(TreeNode* currentNode, char* fileName)
+{
+    FolderContent *content = currentNode->content;
+    List *directories_list = content->children;
+    ListNode *curr = directories_list->head;
+
+    while(curr != NULL)
+    {
+        if(strcmp(curr->info->name, fileName) == 0)
+            return curr;
+
+        curr = curr->next;
+    }
+
+    return NULL;
+}
+
+List *createList()
+{
+    List *list = (List *)malloc(sizeof(List));
+    list->head = NULL;
+    return list;
+}
+
+FolderContent *createFolderContent()
+{
+    FolderContent *folder_content = (FolderContent *)malloc(sizeof(FolderContent));
+    folder_content->children = createList();
+    return folder_content;
+}
+
+ListNode *createNode(void *data)
+{
+    ListNode *node = (ListNode *)malloc(sizeof(ListNode));
+    node->info = data;
+    node->next = NULL;
+    return node;
+}
+
+// Function used to create a directory(a tree node)
+TreeNode *createDirectory(char *name, TreeNode *parent)
+{
+    TreeNode *new_directory = (TreeNode *)malloc(sizeof(TreeNode));
+    new_directory->name = strdup(name);
+    new_directory->type = FOLDER_NODE;
+    new_directory->parent = parent;
+    new_directory->content = (FolderContent *)createFolderContent();
+    return new_directory;
+}
+
+FileContent *createFileContent(char *text)
+{
+    FileContent *file_content = (FileContent *)malloc(sizeof(FileContent));
+    file_content->text = strdup(text);
+    return file_content;
+}
+
+TreeNode *createFile(char *name, char *file_content, TreeNode *parent)
+{
+    TreeNode *new_file = (TreeNode *)malloc(sizeof(TreeNode));
+    new_file->name = strdup(name);
+    new_file->type = FILE_NODE;
+    new_file->parent = parent;
+    new_file->content = (FileContent *)createFileContent(file_content);
+    return new_file;
+}
+
+void addToList(List *list, ListNode *node)
+{
+    if(list->head == NULL)
+    {
+        list->head = node;
+        return;
+    }
+
+    ListNode *curr = list->head;
+    while(curr->next != NULL)
+        curr = curr->next;
+
+    curr->next = node;
+}
 
 FileTree createFileTree(char* rootFolderName) {
-    // TODO
+    
+    FileTree file_system;
+
+    TreeNode *root = createDirectory(rootFolderName, NULL);
+
+    file_system.root = root;
 }
 
 void freeTree(FileTree fileTree) {
     // TODO
 }
 
-
 void ls(TreeNode* currentNode, char* arg) {
-    // TODO
+    
+    if(arg != NULL)
+    {
+        FolderContent *content = (FolderContent *)currentNode->content;
+        List *directories_list = content->children;
+        ListNode *curr = directories_list->head;
+
+        while(curr != NULL)
+        {
+            if(strcmp(curr->info->name, arg) == 0)
+            {
+                if(curr->info->type == FILE_NODE)
+                {
+                    FileContent *content = curr->info->content;
+                    printf("%s: %s\n", arg, content->text);
+                    return;
+                }
+                else
+                {
+                    currentNode = curr->info;  // To print the info in the next node
+                    break;
+                }
+            }
+            curr = curr->next;
+        }
+    }
+
+    FolderContent *content = (FolderContent *)currentNode->content;
+    List *directories_list = content->children;
+    ListNode *curr = directories_list->head;
+
+    while(curr != NULL)
+    {
+        printf("%s\n", curr->info->name);
+        curr = curr->next;
+    }
+
 }
 
 
-void pwd(TreeNode* treeNode) {
-    // TODO
+void pwd(TreeNode* treeNode)  // Done
+{
+    if(strcmp(treeNode->name, "root") == 0)
+    {
+        printf("root");
+        return;
+    }
+
+    pwd(treeNode->parent);
+    printf("/%s", treeNode->name);
 }
 
+TreeNode *getDirectory(TreeNode* currentNode, char* path) 
+{
+
+    char *token = strtok(path, "/");
+
+    while(token)
+    {
+        if(strcmp(token, "..") == 0)
+        {
+            if(currentNode->parent == NULL)
+                return NULL;
+            else
+                currentNode = currentNode->parent;
+        }
+        else
+        {
+            ListNode *aux_node = searchForFile(currentNode, token);
+
+            if(aux_node == NULL)
+                return NULL;
+            else
+            {
+                TreeNode *aux = aux_node->info;
+                currentNode = aux;
+            }
+        }
+        token = strtok(NULL, "/");
+    }
+
+    return currentNode;
+}
 
 TreeNode* cd(TreeNode* currentNode, char* path) {
-    // TODO
+    
+    char *error_handling_string = strdup(path);
+
+    TreeNode *aux = getDirectory(currentNode, path);
+
+    if(aux == NULL)
+    {
+        printf("cd: no such file or directory: %s\n", error_handling_string); // Bcs we strtok it
+        return currentNode;
+    }
+
+    return aux;  // Presupunand ca mereu se ajunge la un director
+
 }
 
+void PrintRecursively(TreeNode* currentNode, int indent)
+{
+    for(int i = 0; i < indent; i++)
+        printf("\t");
+
+    printf("%s\n", currentNode->name);
+
+    if(currentNode->type == FOLDER_NODE)
+    {
+        FolderContent *content = (FolderContent *)currentNode->content;
+        List *directories_list = content->children;
+        ListNode *curr = directories_list->head;
+
+        while(curr != NULL)
+        {   
+            PrintRecursively(curr->info, indent + 1);
+            curr = curr->next;
+        }
+    }
+}
 
 void tree(TreeNode* currentNode, char* arg) {
-    // TODO
-}
+    
+    char *error_handling_string = strdup(arg);
 
+    TreeNode *aux = getDirectory(currentNode, arg);
+
+    if(aux == NULL || aux->type == FILE_NODE)
+    {
+        printf("%s [error opening dir] \n\n0 directories, 0 files\n\n", error_handling_string);
+        return;
+    }
+    
+    PrintRecursively(aux, 0);
+}
 
 void mkdir(TreeNode* currentNode, char* folderName) {
-    // TODO
+
+    if(searchForFile(currentNode, folderName) != NULL)
+    {
+        printf("mkdir: cannot create directory '%s': File exists\n", folderName);
+        return;
+    }
+
+    TreeNode *new_directory = createDirectory(folderName, currentNode);
+    ListNode *new_node = createNode(new_directory);
+
+    FolderContent *content = (FolderContent *)currentNode->content;
+
+    List* directory_list = (List *)content->children;
+
+    addToList(directory_list, new_node);
 }
 
 
-void rmrec(TreeNode* currentNode, char* resourceName) {
-    // TODO
+// void removeNode(TreeNode* currentNode, char* fileName)
+// {
+//     FolderContent *content = (FolderContent *)currentNode->content;
+//     List *directories_list = content->children;
+//     ListNode *curr = directories_list->head;
+
+//     if(strcmp(curr->info->name, fileName) == 0)
+//     {
+//         directories_list->head = curr->next;
+
+    
+//         if(curr->info->type = FILE_NODE)
+//             cleanNode(curr);
+//         else
+//         {
+//             FolderContent *content = (FolderContent *)curr->info->content;
+//             List *directories_list = content->children;
+
+//             if(content->children->head == NULL)
+//                 cleanNode(curr);
+//             else
+//             {
+//                 RemoveNodeRec()
+//             }
+//         }
+
+//         directories_list->head = directories_list->head->next;
+//         return;
+//     }
+
+//     while(curr->next != NULL)
+//     {
+//         if(strcmp(curr->next->info->name, fileName) == 0)
+//         {
+//             ListNode *aux = curr->next;
+//             curr->next = curr->next->next;
+
+//             cleanNode(aux);
+//             return;
+//         }
+//         curr = curr->next;
+//     }
+// }
+
+void cleanNode(ListNode *node)
+{
+    if(node->info->type == FOLDER_NODE)
+    {
+        FolderContent *content = (FolderContent *)node->info->content;
+        List* directory_list = (List *)content->children;
+        free(directory_list);
+        free(content);
+    }
+    else if(node->info->type == FILE_NODE)
+    {
+        FileContent *content = (FileContent *)node->info->content;
+        free(content->text);
+        free(content);
+    }
+
+    free(node->info->name);
+    free(node->info);
+    free(node);
 }
 
+void cleanListRec(List* list)
+{
+    ListNode *curr = list->head;
+    ListNode *prev;
+
+    while(curr != NULL)
+    {
+        prev = curr;
+        curr = curr->next;
+        if(prev->info->type == FILE_NODE)
+            cleanNode(prev);
+        else
+        {
+            FolderContent *content = (FolderContent *)prev->info->content;
+            List* directory_list = (List *)content->children;
+            
+            if(directory_list->head != NULL)
+                cleanListRec(directory_list);
+            
+            cleanNode(prev);
+        }
+    }
+}
+
+void rmrec(TreeNode* currentNode, char* resourceName)
+{
+    
+    ListNode *aux_node = searchForFile(currentNode, resourceName);
+
+    if(aux_node == NULL)
+    {
+        printf("rmrec: failed to remove %s: No such file or directory\n", resourceName);
+        return;
+    }
+
+    FolderContent *content = (FolderContent *)aux_node->info->content;
+  
+    cleanListRec(content->children);
+
+    // Remove the node from its position
+
+    FolderContent *content_parent = (FolderContent *)currentNode->content;
+
+    List *directories_list = content_parent->children;
+    ListNode *curr = directories_list->head;
+    ListNode *aux = NULL;
+
+    if (strcmp(directories_list->head->info->name, resourceName) == 0)
+    {
+        directories_list->head = directories_list->head->next;
+        cleanNode(curr);
+        return;
+    }
+
+    while(curr->next != NULL)
+    {
+        if(strcmp(curr->next->info->name, resourceName) == 0)
+        {
+            aux = curr->next;
+            curr->next = curr->next->next;
+            cleanNode(aux);
+            return;
+        }
+      curr = curr->next;
+    }
+}
+
+void removeNodeFromList(TreeNode* currentNode, char* folderName) 
+{
+    FolderContent *content = (FolderContent *)currentNode->content;
+    List *directories_list = content->children;
+    ListNode *curr = directories_list->head;
+
+    if(strcmp(curr->info->name, folderName) == 0)
+    {
+        directories_list->head = curr->next;
+
+        cleanNode(curr);
+        return;
+    }
+
+    while(curr->next != NULL)
+    {
+        if(strcmp(curr->next->info->name, folderName) == 0)
+        {
+            ListNode *aux = curr->next;
+            curr->next = curr->next->next;
+
+            cleanNode(aux);
+            return;
+        }
+       curr = curr->next;
+    }
+
+}
 
 void rm(TreeNode* currentNode, char* fileName) {
-    // TODO
+    
+    char *aux_filename = strdup(fileName);
+    ListNode *aux = searchForFile(currentNode, aux_filename);
+
+    if(aux == NULL)
+    {
+        printf("rm: failed to remove %s: No such file or directory.\n", fileName);
+        return;
+    }
+    if(aux->info->type == FOLDER_NODE)
+    {
+        printf("rm: cannot remove %s: Is a directory.", fileName);
+        return;
+    }
+
+    removeNodeFromList(currentNode, fileName);
 }
 
 
-void rmdir(TreeNode* currentNode, char* folderName) {
-    // TODO
+void rmdir(TreeNode* currentNode, char* folderName)
+{
+    char *aux_foldername = strdup(folderName);
+    ListNode *aux = searchForFile(currentNode, aux_foldername);
+
+    if(aux == NULL)
+    {
+        printf("rmdir: failed to remove %s: No such file or directory.\n", folderName);
+        return;
+    }
+    
+    if(aux->info->type == FILE_NODE)
+    {
+        printf("rmdir: failed to remove %s: Not a directory.\n", folderName);
+        return;
+    }
+
+    FolderContent *content = (FolderContent *)aux->info->content;
+
+    if(content->children->head != NULL)
+    {
+        printf("rmdir: failed to remove %s: Directory not empty.\n", folderName);
+        return;
+    }
+
+    removeNodeFromList(currentNode, folderName);
 }
 
 
 void touch(TreeNode* currentNode, char* fileName, char* fileContent) {
-    // TODO
+    
+    TreeNode *new_file = createFile(fileName, fileContent, currentNode);
+    ListNode *new_node = createNode(new_file);
+
+    FolderContent *content = (FolderContent *)currentNode->content;
+
+    List* directory_list = (List *)content->children;
+
+    addToList(directory_list, new_node);
 }
 
 
 void cp(TreeNode* currentNode, char* source, char* destination) {
-    // TODO
+    
+    char *aux_destination = strdup(destination);
+    char *aux_source = strdup(source);
+    ListNode *source_file = searchForFile(currentNode, aux_destination);
+    ListNode *destination_directory = searchForFile(currentNode, aux_source);
+
+    if(source_file->info->type == FOLDER_NODE)
+    {
+        printf("cp: -r not specified; omitting directory %s>\n", source);
+        return;
+    }
+
+    if(destination_directory == NULL)
+    {
+        printf("cp: failed to access %s: Not a directory\n", source);
+        return;
+    }
+
+    if(destination_directory->info->type == FILE_NODE)
+    {
+        free(destination_directory->info->content);
+        destination_directory->info->content = strdup(source_file->info->content);
+        return;
+    }
+    else
+    {
+        FolderContent *content = (FolderContent *)destination_directory->info->content;
+        TreeNode *new_file = createFile(source, source_file->info->content, destination_directory->info);
+        ListNode *new_node = createNode(new_file);
+
+        addToList(content->children, new_node);
+    }
+
+
 }
 
 void mv(TreeNode* currentNode, char* source, char* destination) {
