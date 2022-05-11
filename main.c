@@ -62,7 +62,7 @@ int main() {
     FileTree fileTree = createFileTree(strdup("root"));
     TreeNode* currentFolder = fileTree.root;
 
-    while (fgets(line, sizeof(line), f) != NULL) {
+    while (fgets(line, sizeof(line), stdin) != NULL) {
         line[strlen(line)-1] = 0;
        
         cmd[0][0] = cmd[1][0] = cmd[2][0] = 0;
@@ -75,6 +75,12 @@ int main() {
 
             token = strtok(NULL, " ");
         }
+
+        if(strcmp(cmd[0], "exit") == 0)
+        {
+            break;
+        }
+
         currentFolder = process_command(currentFolder, cmd, token_idx);
     }
 
