@@ -22,6 +22,7 @@ void execute_command(char *cmd, char *arg1, char *arg2) {
 
 TreeNode* process_command(TreeNode* currentFolder, char cmd[3][TOKEN_MAX_LEN], int token_count) {
     execute_command(cmd[0], cmd[1], cmd[2]);
+    
     if (!strcmp(cmd[0], LS)) {
         ls(currentFolder, cmd[1]);
     } else if (!strcmp(cmd[0], PWD)) {
@@ -52,6 +53,7 @@ TreeNode* process_command(TreeNode* currentFolder, char cmd[3][TOKEN_MAX_LEN], i
 }
 
 int main() {
+    
     FILE *f = fopen("commands.in", "r");
     char line[LINE_MAX_LEN];
     char cmd[3][TOKEN_MAX_LEN];
@@ -60,9 +62,9 @@ int main() {
     FileTree fileTree = createFileTree(strdup("root"));
     TreeNode* currentFolder = fileTree.root;
 
-    while (fgets(line, sizeof(line), f) != NULL) {
+    while (fgets(line, sizeof(line), stdin) != NULL) {
         line[strlen(line)-1] = 0;
-
+       
         cmd[0][0] = cmd[1][0] = cmd[2][0] = 0;
 
         int token_idx = 0;
