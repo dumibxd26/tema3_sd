@@ -49,7 +49,7 @@ ListNode *createNode(void *data)
 TreeNode *createDirectory(char *name, TreeNode *parent)
 {
     TreeNode *new_directory = (TreeNode *)malloc(sizeof(TreeNode));
-    new_directory->name = strdup(name);
+    new_directory->name = name;
     new_directory->type = FOLDER_NODE;
     new_directory->parent = parent;
     new_directory->content = (FolderContent *)createFolderContent();
@@ -59,14 +59,14 @@ TreeNode *createDirectory(char *name, TreeNode *parent)
 FileContent *createFileContent(char *text)
 {
     FileContent *file_content = (FileContent *)malloc(sizeof(FileContent));
-    file_content->text = strdup(text);
+    file_content->text = text;
     return file_content;
 }
 
 TreeNode *createFile(char *name, char *file_content, TreeNode *parent)
 {
     TreeNode *new_file = (TreeNode *)malloc(sizeof(TreeNode));
-    new_file->name = strdup(name);
+    new_file->name = name;
     new_file->type = FILE_NODE;
     new_file->parent = parent;
     new_file->content = (FileContent *)createFileContent(file_content);
@@ -93,7 +93,6 @@ FileTree createFileTree(char* rootFolderName) {
     FileTree file_system;
 
     TreeNode *root = createDirectory(rootFolderName, NULL);
-    free(rootFolderName); // Ptc il dau cu strdup in main
 
     file_system.root = root;
 
@@ -107,8 +106,7 @@ void freeTree(FileTree fileTree)
 
     List *directories_list = content->children;
     cleanListRec(directories_list);
-
-    free(directories_list); // poate modific in cleanlistrec
+    
     free(root->content);
     free(root->name);
     free(root);
@@ -169,7 +167,6 @@ void pwd(TreeNode* treeNode)  // Done
 
 TreeNode *getDirectory(TreeNode* currentNode, char* path) 
 {
-
     char *token = strtok(path, "/");
 
     while(token)
@@ -201,13 +198,14 @@ TreeNode *getDirectory(TreeNode* currentNode, char* path)
 
 TreeNode* cd(TreeNode* currentNode, char* path) {
     
-    char *error_handling_string = strdup(path);
+    char *error_handling_string = strdup(path);  // Bcs we'll use strok on the main string
 
     TreeNode *aux = getDirectory(currentNode, path);
 
     if(aux == NULL)
     {
-        printf("cd: no such file or directory: %s\n", error_handling_string); // Bcs we strtok it
+        printf("cd: no such file or directory: %s\n", error_handling_string);
+        free(error_handling_string);
         return currentNode;
     }
 
@@ -245,6 +243,7 @@ void tree(TreeNode* currentNode, char* arg) {
     if(aux == NULL || aux->type == FILE_NODE)
     {
         printf("%s [error opening dir] \n\n0 directories, 0 files\n\n", error_handling_string);
+        free(error_handling_string);
         return;
     }
     
@@ -267,6 +266,7 @@ void mkdir(TreeNode* currentNode, char* folderName) {
     List* directory_list = (List *)content->children;
 
     addToList(directory_list, new_node);
+    free(folderName);
 }
 
 void cleanNode(ListNode *node)
@@ -312,6 +312,8 @@ void cleanListRec(List* list)
             cleanNode(prev);
         }
     }
+
+    free(list);
 }
 
 void rmrec(TreeNode* currentNode, char* resourceName)
@@ -355,6 +357,7 @@ void rmrec(TreeNode* currentNode, char* resourceName)
         }
       curr = curr->next;
     }
+
 }
 
 void removeNodeFromList(TreeNode* currentNode, char* folderName) 
@@ -390,6 +393,7 @@ void rm(TreeNode* currentNode, char* fileName) {
     
     char *aux_filename = strdup(fileName);
     ListNode *aux = searchForFile(currentNode, aux_filename);
+    free(aux_filename);
 
     if(aux == NULL)
     {
@@ -496,12 +500,6 @@ void mv(TreeNode* currentNode, char* source, char* destination)
         printf("mv: failed to access %s: Not a directory\n", source);  // Nu mentioneza ce fac in this case
         return;
     }
-
-    // FolderContent *content = (FolderContent *)destination_directory->content;
-    // TreeNode *new_file = createFile(source, source_file->content, destination_directory);
-    // ListNode *new_node = createNode(new_file);
-
-    // addToList(content->children, new_node);
       
     FolderContent *destination_content = (FolderContent *)destination_directory->content;
     List *destination_list = destination_content->children;
