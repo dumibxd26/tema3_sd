@@ -93,12 +93,25 @@ FileTree createFileTree(char* rootFolderName) {
     FileTree file_system;
 
     TreeNode *root = createDirectory(rootFolderName, NULL);
+    free(rootFolderName); // Ptc il dau cu strdup in main
 
     file_system.root = root;
+
+    return file_system;
 }
 
-void freeTree(FileTree fileTree) {
-    // TODO
+void freeTree(FileTree fileTree) 
+{
+    TreeNode *root = fileTree.root;
+    FolderContent *content = root->content;
+
+    List *directories_list = content->children;
+    cleanListRec(directories_list);
+
+    free(directories_list); // poate modific in cleanlistrec
+    free(root->content);
+    free(root->name);
+    free(root);
 }
 
 void ls(TreeNode* currentNode, char* arg) {
@@ -255,51 +268,6 @@ void mkdir(TreeNode* currentNode, char* folderName) {
 
     addToList(directory_list, new_node);
 }
-
-
-// void removeNode(TreeNode* currentNode, char* fileName)
-// {
-//     FolderContent *content = (FolderContent *)currentNode->content;
-//     List *directories_list = content->children;
-//     ListNode *curr = directories_list->head;
-
-//     if(strcmp(curr->info->name, fileName) == 0)
-//     {
-//         directories_list->head = curr->next;
-
-    
-//         if(curr->info->type = FILE_NODE)
-//             cleanNode(curr);
-//         else
-//         {
-//             FolderContent *content = (FolderContent *)curr->info->content;
-//             List *directories_list = content->children;
-
-//             if(content->children->head == NULL)
-//                 cleanNode(curr);
-//             else
-//             {
-//                 RemoveNodeRec()
-//             }
-//         }
-
-//         directories_list->head = directories_list->head->next;
-//         return;
-//     }
-
-//     while(curr->next != NULL)
-//     {
-//         if(strcmp(curr->next->info->name, fileName) == 0)
-//         {
-//             ListNode *aux = curr->next;
-//             curr->next = curr->next->next;
-
-//             cleanNode(aux);
-//             return;
-//         }
-//         curr = curr->next;
-//     }
-// }
 
 void cleanNode(ListNode *node)
 {
