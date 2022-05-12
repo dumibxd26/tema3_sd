@@ -215,6 +215,7 @@ TreeNode* cd(TreeNode* currentNode, char* path) {
         return currentNode;
     }
 
+    free(error_handling_string);
     return aux;  // Presupunand ca mereu se ajunge la un director
 
 }
@@ -253,6 +254,7 @@ void tree(TreeNode* currentNode, char* arg) {
         return;
     }
     
+    free(error_handling_string);
     PrintRecursively(aux, 0);
 }
 
@@ -330,6 +332,7 @@ void rmrec(TreeNode* currentNode, char* resourceName)
     if(aux_node == NULL)
     {
         printf("rmrec: failed to remove %s: No such file or directory\n", resourceName);
+        free(resourceName);
         return;
     }
 
@@ -364,6 +367,7 @@ void rmrec(TreeNode* currentNode, char* resourceName)
       curr = curr->next;
     }
 
+    free(resourceName);
 }
 
 void removeNodeFromList(TreeNode* currentNode, char* folderName) 
@@ -397,9 +401,7 @@ void removeNodeFromList(TreeNode* currentNode, char* folderName)
 
 void rm(TreeNode* currentNode, char* fileName) {
     
-    char *aux_filename = strdup(fileName);
-    ListNode *aux = searchForFile(currentNode, aux_filename);
-    free(aux_filename);
+    ListNode *aux = searchForFile(currentNode, fileName);
 
     if(aux == NULL)
     {
