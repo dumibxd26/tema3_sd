@@ -113,8 +113,12 @@ void freeTree(FileTree fileTree)
 }
 
 void ls(TreeNode* currentNode, char* arg) {
-    
-    if(arg != NULL)
+
+  //  printf("%d\n", arg[0] == 0); //!
+
+    TreeNode *pastNode = currentNode;;
+
+    if(arg[0] == 0)
     {
         FolderContent *content = (FolderContent *)currentNode->content;
         List *directories_list = content->children;
@@ -149,6 +153,8 @@ void ls(TreeNode* currentNode, char* arg) {
         printf("%s\n", curr->info->name);
         curr = curr->next;
     }
+
+    currentNode = pastNode;
 
 }
 
@@ -255,6 +261,7 @@ void mkdir(TreeNode* currentNode, char* folderName) {
     if(searchForFile(currentNode, folderName) != NULL)
     {
         printf("mkdir: cannot create directory '%s': File exists\n", folderName);
+        free(folderName);
         return;
     }
 
@@ -266,7 +273,6 @@ void mkdir(TreeNode* currentNode, char* folderName) {
     List* directory_list = (List *)content->children;
 
     addToList(directory_list, new_node);
-    free(folderName);
 }
 
 void cleanNode(ListNode *node)
@@ -412,8 +418,7 @@ void rm(TreeNode* currentNode, char* fileName) {
 
 void rmdir(TreeNode* currentNode, char* folderName)
 {
-    char *aux_foldername = strdup(folderName);
-    ListNode *aux = searchForFile(currentNode, aux_foldername);
+    ListNode *aux = searchForFile(currentNode, folderName);
 
     if(aux == NULL)
     {
