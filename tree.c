@@ -113,8 +113,12 @@ void freeTree(FileTree fileTree)
 }
 
 void ls(TreeNode* currentNode, char* arg) {
-    
-    if(arg != NULL)
+
+  //  printf("%d\n", arg[0] == 0); //!
+
+    TreeNode *pastNode = currentNode;;
+
+    if(arg[0] == 0)
     {
         FolderContent *content = (FolderContent *)currentNode->content;
         List *directories_list = content->children;
@@ -149,6 +153,8 @@ void ls(TreeNode* currentNode, char* arg) {
         printf("%s\n", curr->info->name);
         curr = curr->next;
     }
+
+    currentNode = pastNode;
 
 }
 
@@ -209,6 +215,7 @@ TreeNode* cd(TreeNode* currentNode, char* path) {
         return currentNode;
     }
 
+    free(error_handling_string);
     return aux;  // Presupunand ca mereu se ajunge la un director
 
 }
@@ -247,6 +254,7 @@ void tree(TreeNode* currentNode, char* arg) {
         return;
     }
     
+    free(error_handling_string);
     PrintRecursively(aux, 0);
 }
 
@@ -255,6 +263,7 @@ void mkdir(TreeNode* currentNode, char* folderName) {
     if(searchForFile(currentNode, folderName) != NULL)
     {
         printf("mkdir: cannot create directory '%s': File exists\n", folderName);
+        free(folderName);
         return;
     }
 
@@ -266,7 +275,6 @@ void mkdir(TreeNode* currentNode, char* folderName) {
     List* directory_list = (List *)content->children;
 
     addToList(directory_list, new_node);
-    free(folderName);
 }
 
 void cleanNode(ListNode *node)
@@ -324,6 +332,7 @@ void rmrec(TreeNode* currentNode, char* resourceName)
     if(aux_node == NULL)
     {
         printf("rmrec: failed to remove %s: No such file or directory\n", resourceName);
+        free(resourceName);
         return;
     }
 
@@ -358,6 +367,7 @@ void rmrec(TreeNode* currentNode, char* resourceName)
       curr = curr->next;
     }
 
+    free(resourceName);
 }
 
 void removeNodeFromList(TreeNode* currentNode, char* folderName) 
@@ -391,9 +401,7 @@ void removeNodeFromList(TreeNode* currentNode, char* folderName)
 
 void rm(TreeNode* currentNode, char* fileName) {
     
-    char *aux_filename = strdup(fileName);
-    ListNode *aux = searchForFile(currentNode, aux_filename);
-    free(aux_filename);
+    ListNode *aux = searchForFile(currentNode, fileName);
 
     if(aux == NULL)
     {
@@ -412,8 +420,7 @@ void rm(TreeNode* currentNode, char* fileName) {
 
 void rmdir(TreeNode* currentNode, char* folderName)
 {
-    char *aux_foldername = strdup(folderName);
-    ListNode *aux = searchForFile(currentNode, aux_foldername);
+    ListNode *aux = searchForFile(currentNode, folderName);
 
     if(aux == NULL)
     {
