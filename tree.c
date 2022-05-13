@@ -464,6 +464,40 @@ void touch(TreeNode* currentNode, char* fileName, char* fileContent)
     addToList(directory_list, new_node);
 }
 
+void reverse_string(char *string, int elements)
+{
+
+    for(int i = 0; i < elements / 2; i++)
+    {
+        int aux = string[i];
+        string[i] = string[elements - i - 1];
+        string[elements - i - 1] = aux;
+    }
+}
+
+char *get_string_name(char *path)
+{
+    int pos = strlen(path) - 1;
+
+    char *new_string = malloc(300);
+    int el = 0;
+
+    while(pos != 0 && path[pos] != '/' )
+    {
+        new_string[el] = path[pos];
+        el++;
+        path[pos] = '\0';
+        pos--;
+    }
+    if(pos)
+        path[pos] = '\0';
+
+    new_string[el] = '\0';
+
+    reverse_string(new_string, el);
+
+    return new_string;
+}
 
 void cp(TreeNode* currentNode, char* source, char* destination) {
     
@@ -483,19 +517,24 @@ void cp(TreeNode* currentNode, char* source, char* destination) {
 
     if(destination_directory == NULL)
     {
-        // Rezolv dupa ce vad teste
 
-        // char *name = get
-        // TreeNode *dir_for_named_file = parent_dir_of_file();
+        char *create_file_name = get_string_name(destination);
 
+        TreeNode *dir_for_named_file = getDirectory(currentNode, destination);  // What's left from the destination
 
-        // if(dir_for_named_file == NULL)
-        // {
-        //     printf("cp: failed to access %s: Not a directory\n", source);
-        //     return;
-        // }
+        if(dir_for_named_file == NULL)
+        {
+            printf("cp: failed to access %s: Not a directory\n", source);
+            free(create_file_name);
+            return;
+        }
 
+        FolderContent *content = (FolderContent *)dir_for_named_file->content;
+        TreeNode *new_file = createFile(create_file_name, strdup(((FileContent *)(source_file->content))->text), destination_directory);
+        ListNode *new_node = createNode(new_file);
 
+        addToList(content->children, new_node);
+        return ;
     }
 
     if(destination_directory->type == FILE_NODE)
