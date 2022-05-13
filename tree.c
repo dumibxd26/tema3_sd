@@ -342,7 +342,6 @@ void rmrec(TreeNode* currentNode, char* resourceName)
 
     // Remove the node from its position
 
-
     FolderContent *content_parent = (FolderContent *)currentNode->content;
 
     List *directories_list = content_parent->children;
@@ -465,6 +464,40 @@ void touch(TreeNode* currentNode, char* fileName, char* fileContent)
     addToList(directory_list, new_node);
 }
 
+void reverse_string(char *string, int elements)
+{
+
+    for(int i = 0; i < elements / 2; i++)
+    {
+        int aux = string[i];
+        string[i] = string[elements - i - 1];
+        string[elements - i - 1] = aux;
+    }
+}
+
+char *get_string_name(char *path)
+{
+    int pos = strlen(path) - 1;
+
+    char *new_string = malloc(300);
+    int el = 0;
+
+    while(pos != 0 && path[pos] != '/' )
+    {
+        new_string[el] = path[pos];
+        el++;
+        path[pos] = '\0';
+        pos--;
+    }
+    if(pos)
+        path[pos] = '\0';
+
+    new_string[el] = '\0';
+
+    reverse_string(new_string, el);
+
+    return new_string;
+}
 
 void cp(TreeNode* currentNode, char* source, char* destination) {
     
@@ -484,19 +517,28 @@ void cp(TreeNode* currentNode, char* source, char* destination) {
 
     if(destination_directory == NULL)
     {
-        // Rezolv dupa ce vad teste
+        char *save_destination = strdup(destination);
 
-        // char *name = get
-        // TreeNode *dir_for_named_file = parent_dir_of_file();
+        char *create_file_name = get_string_name(destination);
 
+        TreeNode *dir_for_named_file = getDirectory(currentNode, destination);  // What's left from the destination
 
-        // if(dir_for_named_file == NULL)
-        // {
-        //     printf("cp: failed to access %s: Not a directory\n", source);
-        //     return;
-        // }
+        if(dir_for_named_file == NULL)
+        {
+            printf("cp: failed to access %s: Not a directory\n", save_destination);
+            free(save_destination);
+            free(create_file_name);
+            return;
+        }
 
+        FolderContent *content = (FolderContent *)dir_for_named_file->content;
+        TreeNode *new_file = createFile(create_file_name, strdup(((FileContent *)(source_file->content))->text), destination_directory);
+        ListNode *new_node = createNode(new_file);
 
+        addToList(content->children, new_node);
+
+        free(save_destination);
+        return ;
     }
 
     if(destination_directory->type == FILE_NODE)
@@ -525,6 +567,9 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     TreeNode *source_file = getDirectory(currentNode, aux_source);
     TreeNode *destination_directory = getDirectory(currentNode, aux_destination);
 
+    free(aux_destination);
+    free(aux_source);
+
     if(destination_directory == NULL)
     {
         printf("mv: failed to access %s: Not a directory\n", source);  // Nu mentioneza ce fac in this case
@@ -540,9 +585,10 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     List *directories_list = content_parent->children;
     ListNode *curr = directories_list->head;
 
-    if(strcmp(curr->info->name, source) == 0)
+    if(strcmp(curr->info->name, source_file->name) == 0)
     {
         directories_list->head = curr->next;
+        curr->next = NULL;
             
         addToList(destination_list, curr);
         return;
@@ -550,10 +596,13 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     
     while(curr->next != NULL)
     {
-        if(strcmp(curr->next->info->name, source) == 0)
+      
+        if(strcmp(curr->next->info->name, source_file->name) == 0)
         {
             ListNode *aux = curr->next;
             curr->next = curr->next->next;
+
+            aux->next = NULL;
             addToList(destination_list, aux);
             return;
         }
