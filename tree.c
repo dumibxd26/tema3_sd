@@ -342,7 +342,6 @@ void rmrec(TreeNode* currentNode, char* resourceName)
 
     // Remove the node from its position
 
-
     FolderContent *content_parent = (FolderContent *)currentNode->content;
 
     List *directories_list = content_parent->children;
@@ -525,6 +524,9 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     TreeNode *source_file = getDirectory(currentNode, aux_source);
     TreeNode *destination_directory = getDirectory(currentNode, aux_destination);
 
+    free(aux_destination);
+    free(aux_source);
+
     if(destination_directory == NULL)
     {
         printf("mv: failed to access %s: Not a directory\n", source);  // Nu mentioneza ce fac in this case
@@ -540,9 +542,10 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     List *directories_list = content_parent->children;
     ListNode *curr = directories_list->head;
 
-    if(strcmp(curr->info->name, source) == 0)
+    if(strcmp(curr->info->name, source_file->name) == 0)
     {
         directories_list->head = curr->next;
+        curr->next = NULL;
             
         addToList(destination_list, curr);
         return;
@@ -550,10 +553,13 @@ void mv(TreeNode* currentNode, char* source, char* destination)
     
     while(curr->next != NULL)
     {
-        if(strcmp(curr->next->info->name, source) == 0)
+      
+        if(strcmp(curr->next->info->name, source_file->name) == 0)
         {
             ListNode *aux = curr->next;
             curr->next = curr->next->next;
+
+            aux->next = NULL;
             addToList(destination_list, aux);
             return;
         }
