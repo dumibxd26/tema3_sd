@@ -517,6 +517,7 @@ void cp(TreeNode* currentNode, char* source, char* destination) {
 
     if(destination_directory == NULL)
     {
+        char *save_destination = strdup(destination);
 
         char *create_file_name = get_string_name(destination);
 
@@ -524,7 +525,8 @@ void cp(TreeNode* currentNode, char* source, char* destination) {
 
         if(dir_for_named_file == NULL)
         {
-            printf("cp: failed to access %s: Not a directory\n", source);
+            printf("cp: failed to access %s: Not a directory\n", save_destination);
+            free(save_destination);
             free(create_file_name);
             return;
         }
@@ -534,6 +536,8 @@ void cp(TreeNode* currentNode, char* source, char* destination) {
         ListNode *new_node = createNode(new_file);
 
         addToList(content->children, new_node);
+
+        free(save_destination);
         return ;
     }
 
