@@ -59,7 +59,7 @@ void freeTree(FileTree fileTree);
 
 void cleanListRec(List* list);
 void cleanNode(ListNode *node);
-void PrintRecursively(TreeNode* currentNode, int indent);
+void PrintRecursively(TreeNode* currentNode, int indent, int *nr_of_folders, int *nr_of_files);
 TreeNode *getDirectory(TreeNode* currentNode, char* path);
 void addToList(List *list, ListNode *node);
 ListNode *searchForFile(TreeNode* currentNode, char* fileName);
