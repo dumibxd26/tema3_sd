@@ -14,13 +14,7 @@ ListNode *searchForFile(TreeNode *currentNode, char *fileName)
 
     while (curr != NULL)
     {
-<<<<<<< HEAD
-        //    printf("\n\nletsgo: %s %s %s %d\n\n\n\n", currentNode->name, curr->info->name, fileName, strcmp(curr->info->name, fileName) == 0);
-
         if (strcmp(curr->info->name, fileName) == 0)
-=======
-        if(strcmp(curr->info->name, fileName) == 0)
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
             return curr;
 
         curr = curr->next;
@@ -51,11 +45,9 @@ ListNode *createNode(void *data)
     return node;
 }
 
-
 /* Poti face createTreeNode care sa inlocuiasca createDirectory si create file
    practic sa fie o functie generica care sa aiba ca parametri type si content
 */
-
 
 TreeNode *createDirectory(char *name, TreeNode *parent)
 {
@@ -121,13 +113,7 @@ void ls(TreeNode *currentNode, char *arg)
 
     //  printf("%d\n", arg[0] == 0); //!
 
-<<<<<<< HEAD
-    TreeNode *pastNode = currentNode;
-
     if (arg[0] != 0)
-=======
-    if(arg[0] != 0)
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
     {
         FolderContent *content = (FolderContent *)currentNode->content;
         List *directories_list = content->children;
@@ -143,7 +129,7 @@ void ls(TreeNode *currentNode, char *arg)
                     printf("%s: %s\n", arg, content->text);
                     return;
                 }
-                else  // It's directory
+                else // It's directory
                 {
                     currentNode = curr->info; // To print the info in the next node
                     break;
@@ -168,11 +154,6 @@ void ls(TreeNode *currentNode, char *arg)
         printf("%s\n", curr->info->name);
         curr = curr->next;
     }
-
-<<<<<<< HEAD
-    currentNode = pastNode;
-=======
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
 }
 
 void pwd(TreeNode *treeNode) // Done
@@ -218,17 +199,10 @@ TreeNode *getDirectory(TreeNode *currentNode, char *path)
     return currentNode;
 }
 
-<<<<<<< HEAD
 TreeNode *cd(TreeNode *currentNode, char *path)
 {
 
     char *error_handling_string = strdup(path); // Bcs we'll use strok on the main string
-=======
-TreeNode* cd(TreeNode* currentNode, char* path)
-{
-    
-    char *error_handling_string = strdup(path);  // Bcs we'll use strok on the main string
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
 
     TreeNode *aux = getDirectory(currentNode, path);
 
@@ -240,22 +214,13 @@ TreeNode* cd(TreeNode* currentNode, char* path)
     }
 
     free(error_handling_string);
-<<<<<<< HEAD
-    return aux; // Presupunand ca mereu se ajunge la un director
-=======
     return aux;
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
 }
 
 void PrintRecursively(TreeNode *currentNode, int indent, int *nr_of_folders, int *nr_of_files)
 {
     for (int i = 0; i < indent; i++)
         printf("    ");
-<<<<<<< HEAD
-
-    // printf("\t");
-=======
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
 
     printf("%s\n", currentNode->name);
 
@@ -298,11 +263,7 @@ void tree(TreeNode *currentNode, char *arg)
     int nr_of_folders = 0;
     int nr_of_files = 0;
 
-<<<<<<< HEAD
-    while (curr != NULL)
-    {
-=======
-    /*  
+    /*
         Daca in dir1 am dir2 dir3 dir4
         la tree afisez
         dir2
@@ -310,9 +271,8 @@ void tree(TreeNode *currentNode, char *arg)
         dir4
     */
 
-    while(curr != NULL)
-    {   
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
+    while (curr != NULL)
+    {
         PrintRecursively(curr->info, 0, &nr_of_folders, &nr_of_files);
         curr = curr->next;
     }
@@ -388,10 +348,6 @@ void cleanListRec(List *list)
 void rmrec(TreeNode *currentNode, char *resourceName)
 {
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
     ListNode *aux_node = searchForFile(currentNode, resourceName);
 
     if (aux_node == NULL)
@@ -460,15 +416,9 @@ void removeNodeFromList(TreeNode *currentNode, char *folderName)
     }
 }
 
-<<<<<<< HEAD
 void rm(TreeNode *currentNode, char *fileName)
 {
 
-=======
-void rm(TreeNode* currentNode, char* fileName)
-{
-    
->>>>>>> a165f8d17601167d8c4d6db0c865b62d32107f20
     ListNode *aux = searchForFile(currentNode, fileName);
 
     // printf("\n\n%s %s\n\n\n", currentNode->name, fileName);
@@ -645,7 +595,7 @@ void mv(TreeNode *currentNode, char *source, char *destination)
     if (source_file == destination_directory)
         return;
 
- //   ListNode *isok = searchForFile(source_file->parent, source_file->name);
+    //   ListNode *isok = searchForFile(source_file->parent, source_file->name);
 
     if (destination_directory == NULL)
     {
