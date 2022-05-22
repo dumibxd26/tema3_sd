@@ -16,58 +16,86 @@
 #define MV "mv"
 #define CP "cp"
 
-void execute_command(char *cmd, char *arg1, char *arg2) {
+void execute_command(char *cmd, char *arg1, char *arg2)
+{
     printf("$ %s %s %s\n", cmd, arg1, arg2);
 }
 
-TreeNode* process_command(TreeNode* currentFolder,
-        char cmd[3][TOKEN_MAX_LEN], int token_count) {
+TreeNode *process_command(TreeNode *currentFolder,
+                          char cmd[3][TOKEN_MAX_LEN], int token_count)
+{
     execute_command(cmd[0], cmd[1], cmd[2]);
-    if (!strcmp(cmd[0], LS)) {
+    if (!strcmp(cmd[0], LS))
+    {
         ls(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], PWD)) {
+    }
+    else if (!strcmp(cmd[0], PWD))
+    {
         pwd(currentFolder);
-    } else if (!strcmp(cmd[0], TREE)) {
+    }
+    else if (!strcmp(cmd[0], TREE))
+    {
         tree(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], CD)) {
+    }
+    else if (!strcmp(cmd[0], CD))
+    {
         currentFolder = cd(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], MKDIR)) {
+    }
+    else if (!strcmp(cmd[0], MKDIR))
+    {
         mkdir(currentFolder, strdup(cmd[1]));
-    } else if (!strcmp(cmd[0], RMDIR)) {
+    }
+    else if (!strcmp(cmd[0], RMDIR))
+    {
         rmdir(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], RM)) {
+    }
+    else if (!strcmp(cmd[0], RM))
+    {
         rm(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], RMREC)) {
+    }
+    else if (!strcmp(cmd[0], RMREC))
+    {
         rmrec(currentFolder, cmd[1]);
-    } else if (!strcmp(cmd[0], TOUCH)) {
+    }
+    else if (!strcmp(cmd[0], TOUCH))
+    {
         touch(currentFolder, strdup(cmd[1]), strdup(cmd[2]));
-    } else if (!strcmp(cmd[0], MV)) {
+    }
+    else if (!strcmp(cmd[0], MV))
+    {
         mv(currentFolder, cmd[1], cmd[2]);
-    } else if (!strcmp(cmd[0], CP)) {
+    }
+    else if (!strcmp(cmd[0], CP))
+    {
         cp(currentFolder, cmd[1], cmd[2]);
-    } else {
+    }
+    else
+    {
         printf("UNRECOGNIZED COMMAND!\n");
     }
     printf("\n");
     return currentFolder;
 }
 
-int main() {
+int main()
+{
     char line[LINE_MAX_LEN];
     char cmd[3][TOKEN_MAX_LEN];
     char *token;
 
     FileTree fileTree = createFileTree(strdup("root"));
-    TreeNode* currentFolder = fileTree.root;
+    TreeNode *currentFolder = fileTree.root;
 
-    while (fgets(line, sizeof(line), stdin) != NULL) {
-        line[strlen(line)-1] = 0;
+    while (fgets(line, sizeof(line), stdin) != NULL)
+    {
+        line[strlen(line) - 1] = 0;
 
         cmd[0][0] = cmd[1][0] = cmd[2][0] = 0;
 
         int token_idx = 0;
         token = strtok(line, " ");
-        while (token) {
+        while (token)
+        {
             strcpy(cmd[token_idx], token);
             ++token_idx;
 
