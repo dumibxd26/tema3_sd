@@ -1,11 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "tree.h"
 #define TREE_CMD_INDENT_SIZE 4
 #define NO_ARG ""
 #define PARENT_DIR ".."
 #define MAX_COMMAND 300
+#ifndef __UTILS_H_
+#define __UTILS_H_
+
+/* useful macro for handling error codes */
+#define DIE(assertion, call_description)  \
+    do                                    \
+    {                                     \
+        if (assertion)                    \
+        {                                 \
+            fprintf(stderr, "(%s, %d): ", \
+                    __FILE__, __LINE__);  \
+            perror(call_description);     \
+            exit(errno);                  \
+        }                                 \
+    } while (0)
+
+#endif /* __UTILS_H_ */
 
 // [START] Folder functions
 FolderContent *createFolderContent()
@@ -13,12 +31,7 @@ FolderContent *createFolderContent()
     // Alloc memory for folder list payload
     FolderContent *folder_content =
         (FolderContent *)malloc(sizeof(FolderContent));
-    if (!folder_content)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
-
+    DIE(!folder_content, "Cant alloc memory.\n");
     // Create the list of contents itself
     folder_content->children = createList();
 
@@ -34,11 +47,7 @@ TreeNode *createTreeNode(char *name, TreeNode *parent, char *file_content)
 
     // Alloc memory for the new tree node we create
     TreeNode *new_node = (TreeNode *)malloc(sizeof(TreeNode));
-    if (!new_node)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
+    DIE(!new_node, "Cant alloc memory.\n");
 
     // Fill the fields of the new node
     new_node->name = name;
@@ -62,11 +71,7 @@ TreeNode *createTreeNode(char *name, TreeNode *parent, char *file_content)
 FileContent *createFileContent(char *text)
 {
     FileContent *file_content = (FileContent *)malloc(sizeof(FileContent));
-    if (!file_content)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
+    DIE(!file_content, "Cant alloc memory.\n");
 
     file_content->text = text;
     return file_content;
@@ -90,11 +95,7 @@ List *createList()
 {
     // Simple function to create a list
     List *list = (List *)malloc(sizeof(List));
-    if (!list)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
+    DIE(!list, "Cant alloc memory.\n");
 
     list->head = NULL;
     return list;
@@ -111,11 +112,7 @@ ListNode *createNode(void *data)
 {
     // Simple function to alloc memory for a new node in a list
     ListNode *node = (ListNode *)malloc(sizeof(ListNode));
-    if (!node)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
+    DIE(!node, "Cant alloc memory.\n");
 
     node->info = data;
     node->next = NULL;
@@ -797,11 +794,7 @@ char *get_string_name(char *path)
     int pos = strlen(path) - 1;
 
     char *new_string = malloc(MAX_COMMAND);
-    if (!new_string)
-    {
-        printf("Cant alloc memory.\n");
-        return NULL;
-    }
+    DIE(!new_string, "Cant alloc memory.\n");
 
     int el = 0;
 
